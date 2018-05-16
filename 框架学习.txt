@@ -1,0 +1,12 @@
+﻿slrad框架学习
+没有控制层，在service里没有跳转，页面跳转在前台完成
+<form id="loginForm" action="Controller" method="post" class="DataEditor" 
+service="UserService.login" nextstep="window.location='index.jsp'">
+
+连接池启动异常
+ Servlet [Controller] in web application [/slardDemo] threw load() exception
+java.lang.NumberFormatException: For input string: "ro"
+原因：连接池配置文件中的password必须是密文 框架自动加密的  
+
+
+任务：写一个权限管理的登录及一个CRUD模块
