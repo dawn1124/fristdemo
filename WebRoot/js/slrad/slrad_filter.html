@@ -1,0 +1,409 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title></title>
+		<script type="text/javascript" src="../jquery.js"></script>
+		<script type="text/javascript" src="../jquery-migrate.js"></script>
+		<script type="text/javascript" src="slrad.js"></script>
+		<script type="text/javascript">
+		var win= window.parent;
+	var filter_params = win["date_filter_params"];
+
+	var condTemplet;
+	$(document).ready(function() {
+
+		/* 在字段列表中添加字段 */
+		var fields = filter_params.dataStruct.fields;
+		$.each(fields, function(i, n) {
+			if (n.field && n.filter != "0") {
+				var alias = (!n.alias) ? n.field : n.alias;
+				$("select[name='fields']").append("<option value=\"" + n.field + "\" alias=\"" + alias + "\">" + n.name + "</option>");
+			}
+		});
+
+		/* 为字段列表选择绑定事件，支持DataHeader中使用字段值mapping */
+		$(document).on('change',"select[name='fields']",function() {
+			var select = $(this);
+			var field = select.val();
+			/* support field use value-mapping change input:text to select*/
+			$.each(fields, function(i, n) {
+				if (n.field == field) {
+					if (n.mapping) {
+						var ks = $("<select name='keyword'></select>");
+						ks.append($("<option>"));
+						var mapping = n.mapping.split(",");
+						$.each(mapping, function(i, n) {
+							var pos = n.indexOf(":");
+							if (pos != -1) {
+								ks.append($("<option value='" + n.substring(0, pos) + "'>" + n.substring(pos + 1) + "</option>"));
+							}
+						});
+						ks.replaceAll(select.parents("tr").find("[name='keyword']"));
+						/* end $.each() */
+						return false;
+					}
+
+					var kwSelectField = select.parents("tr").find("[name='keyword']");
+					if (kwSelectField.length > 0) {
+						$("<input name='keyword' />").replaceAll(kwSelectField);
+					}
+					/* end $.each() */
+					return false;
+				}
+			});
+		});
+		
+
+		condTemplet = $("#conditionsTable tr:eq(1)").clone();
+
+		/* 恢复上一次设定的条件过滤参数 */
+		var conditions = filter_params.conditions;
+		if (conditions) {
+			var table = $("#conditionsTable");
+			$("#conditionsTable tr:eq(1)").remove();
+			$.each(conditions, function(i, cond) {
+				var tr = condTemplet.clone().insertAfter("#conditionsTable tr:last");
+				$("input[name='leftBracket']", tr).val(cond.leftBracket);
+				$("select[name='fields']", tr).val(cond.field).trigger('change');
+				$("select[name='operator']", tr).val(cond.operator);
+				$("input[name='rightBracket']", tr).val(cond.rightBracket);
+				$("select[name='logic']", tr).val(cond.logic);
+				$("[name='keyword']", tr).val(cond.keyword);
+			});
+		}
+		
+		
+		/*绑定事件处理*/
+
+		/*添加条件按钮*/
+		$("#buttAddCondition").click(function() {
+			condTemplet.clone().insertAfter("#conditionsTable tr:last")
+		});
+		
+		/*删除条件*/
+		$(document).on('click',".deleteCondition",function(){
+			$(this).parents("tr").remove();
+			if ($("#conditionsTable tr").length < 2) {
+				addCondition();
+			}		
+		});
+		
+		/*左右括号*/
+		$(document).on('dblclick',".leftBracket",function(){
+			$(this).val($(this).val() + "(");
+		});
+		$(document).on('keyup',".leftBracket",function(){
+			$(this).val($(this).val().replace(/[^\(]/ig,""))
+		});
+		$(document).on('dblclick',".rightBracket",function(){
+			$(this).val($(this).val() + ")");
+		});
+		$(document).on('keyup',".rightBracket",function(){
+			$(this).val($(this).val().replace(/[^\)]/ig,""))
+		});
+
+		
+		/*执行筛选*/
+		$("#buttDoFilter").click(function(){
+			doFilter();
+		});
+	});
+	
+
+
+	function doFilter() {
+		var fields = filter_params.dataStruct.fields;
+		var where = "";
+		var whereAlias = "";
+		var desc = "";
+		//create where
+		var lastConditionTr;
+		$("#conditionsTable tr:gt(0)").each(function() {
+			var tr = $(this);
+			var leftBracket = $("input[name='leftBracket']", tr).val();
+			var field = $("select[name='fields']", tr).val();
+			var fieldAlias = $("select[name='fields'] option:selected", tr).attr('alias');
+			var fieldName = $("select[name='fields'] option:selected", tr).text();
+			var operator = $("select[name='operator']", tr).val();
+			var rightBracket = $("input[name='rightBracket']", tr).val();
+			var logic = $("select[name='logic']", tr).val();
+			var logicName = $("select[name='logic'] option:selected", tr).text();
+			var keyword = $("[name='keyword']", tr).val();
+			var keywordText=$("[name='keyword'] option:selected", tr).text();
+			if (field && operator) {
+
+				if (where) {//检查多个条件间的关系不为空，默认设置为AND
+					var logicEle = $("select[name='logic']", lastConditionTr);
+					var lastLogic = logicEle.val();
+					if (!lastLogic) {
+						lastLogic = "AND";
+						logicEle.val(lastLogic);
+						where += " " + lastLogic + " ";
+						whereAlias += " " + lastLogic + " ";
+						desc += " 并且 ";
+					}
+				}
+
+				var type = "";
+				$.each(fields, function(i, n) {//查找字段类型
+							if (n.field == field) {
+								type = n.type;
+								return false;
+							}
+						});
+
+				where += " " + leftBracket + field + " " + operator + " ";
+				whereAlias += " " + leftBracket + fieldAlias + " " + operator + " ";
+				desc += " " + leftBracket + $.trim(fieldName) + " " + operator + " ";
+				
+				/*like 操作 自动在两端增加百分号 */
+				if(operator=="like" && keyword.indexOf("%")==-1){
+					keyword="%"+keyword+"%";
+				}
+				
+				/*根据值类型确定是否增加单引号*/
+				if (type == "int" || type == "decimal"){//数值不加单引号
+					if (keyword == "") {
+						keyword = "0";
+						$("input[name='keyword']", tr).val("0");
+					}
+					keyword=keyword.replace(/\'/g,'');
+					where += keyword;
+					whereAlias += keyword;
+					desc += (keywordText || keyword);
+				}else if(type.indexOf("@val")!=-1){//表达式
+					keyword=keyword.replace(/\'/g,'\\\'');
+					var sqlFunc=type.replace("@val",keyword);
+					where += sqlFunc;
+					whereAlias += sqlFunc;
+					desc += sqlFunc;					
+				} else  {//非数值加单引号
+					keyword=keyword.replace(/\'/g,'\\\'');
+					where += "'" + keyword + "'";
+					whereAlias += "'" + keyword + "'";
+					desc += "'" + (keywordText || keyword) + "'";
+				}
+
+				where += rightBracket + " " + logic + " ";
+				whereAlias += rightBracket + " " + logic + " ";
+				desc += rightBracket + " " + $.trim(logicName) + " ";
+
+				lastConditionTr = tr;
+			}
+		});
+
+		//检查并清除最后一个条件的关系
+		if (where) {
+			var logic = $("select[name='logic']", lastConditionTr);
+			var lastLogic = logic.val();
+			var lastLogicName = logic.find("option:selected").text();
+			if (lastLogic) {
+				where = where.substring(0, where.length - lastLogic.length - 1);
+				whereAlias = whereAlias.substring(0, whereAlias.length - whereAlias.length - 1);
+				desc = desc.substring(0, desc.length - lastLogicName.length - 1);
+				logic.val("");
+			}
+		}
+
+		//检查括号匹配
+		var bs = where.match(/\([^()]+\)/g);
+		var lbs = where.match(/\(/g);
+		var rbs = where.match(/\)/g);
+		if (bs && lbs && rbs && (lbs.length != bs.length || bs.length != rbs.length)) {
+			alert("括号对应关系或数量不匹配，请检查条件设定！");
+			return false;
+		}
+
+		$("select").each(function() {
+			$(this).attr('defaultValue', $(this).val());
+		});
+
+		/*生成条件设设定对象*/
+		var settings = {
+			where : where,
+			where_alias : whereAlias,
+			where_desc : desc
+		};
+
+		var conditions = [];
+		$("#conditionsTable tr:gt(0)").each(function() {
+			var tr = $(this);
+			var cond = {
+				leftBracket : $("input[name='leftBracket']", tr).val(),
+				field : $("select[name='fields']", tr).val(),
+				fieldAlias : $("select[name='fields'] option:selected", tr).attr('alias'),
+				fieldName : $("select[name='fields'] option:selected", tr).text(),
+				operator : $("select[name='operator']", tr).val(),
+				rightBracket : $("input[name='rightBracket']", tr).val(),
+				logic : $("select[name='logic']", tr).val(),
+				logicName : $("select[name='logic'] option:selected", tr).text(),
+				keyword : $("[name='keyword']", tr).val()
+			}
+			conditions.push(cond);
+		});
+		settings["conditions"] = conditions;
+
+		win["data_filter_settings"] = settings;
+		win["iframe_saved_state"] = true;
+		
+		SL.closeWindow();//关闭colorbox
+
+	}
+
+
+
+	
+
+</script>
+		<style>
+.button_tj {
+	background: url(tj.jpg) no-repeat;
+	width: 120px;
+	height: 25px;
+	text-align: center;
+	border: 0;
+	line-height: 25px;
+	margin: 5px;
+}
+
+.button_sx {
+	background: url(sx.jpg) no-repeat;
+	width: 120px;
+	height: 25px;
+	text-align: center;
+	border: 0;
+	line-height: 25px;
+	margin: 5px;
+}
+
+table.table_screen {
+	border-left: #A1C1CC 1px solid;
+	border-top: #A1C1CC 1px solid;
+	border-bottom: #A1C1CC 1px solid;
+	font-size: 12px;
+}
+
+table#conditionsTable tr th {
+	border-bottom: #A1C1CC 1px solid;
+	border-right: #A1C1CC 1px solid;
+	background-color: #EBF2F4;
+	font-size: 12px;
+	color: #666666;
+	line-height: 26px;
+}
+
+table#conditionsTable tr td {
+	border-right: #A1C1CC 1px solid;
+}
+
+table#conditionsTable tr td input {
+	height: 12px;
+}
+</style>
+	</head>
+	<body>
+
+		<table width="100%" border="0" align="center" cellpadding="0"
+			class="table_screen" id="conditionsTable">
+			<tr>
+				<th>
+					左括号
+				</th>
+				<th>
+					字段
+				</th>
+				<th>
+					操作符
+				</th>
+				<th>
+					参数值
+				</th>
+				<th>
+					右括号
+				</th>
+				<th>
+
+					条件间关系
+
+				</th>
+				<th width="30">
+					&nbsp;
+
+				</th>
+			</tr>
+			<tr>
+				<td height="30" align="center">
+					<input name="leftBracket" class="leftBracket" type="text" size="6"
+						style="text-align: center;">
+				</td>
+				<td align="center">
+					<select name="fields">
+						<option value=""></option>
+					</select>
+				</td>
+				<td align="center">
+					<select name="operator">
+						<option value=""></option>
+						<option value="=">
+							=
+						</option>
+						<option value="&gt;">
+							&gt;
+						</option>
+						<option value="&lt;">
+							&lt;
+						</option>
+						<option value="&gt;=">
+							&gt;=
+						</option>
+						<option value="&lt;=">
+							&lt;=
+						</option>
+						<option value="!=">
+							!=
+						</option>
+						<option value="like">
+							like
+						</option>
+					</select>
+				</td>
+				<td align="center">
+					<input name="keyword" type="text" size="20" onBlur="">
+				</td>
+				<td align="center">
+					<input name="rightBracket" class="rightBracket" type="text"
+						size="6" style="text-align: center;">
+				</td>
+
+				<td align="center">
+					<select name="logic">
+						<option value=""></option>
+						<option value="AND">
+							并且
+						</option>
+						<option value="OR">
+							或者
+						</option>
+					</select>
+				</td>
+				<td>
+					<img src="delete.gif" alt="删除此条件" width="25" height="30"
+						style="cursor: pointer;" class="deleteCondition">
+				</td>
+			</tr>
+		</table>
+		<table width="100%" border="0" align="center" cellpadding="0">
+			<tr>
+				<td align="left">
+					<input name="buttAddCondition" id="buttAddCondition" type="button"
+						class="button_tj" value="添加条件" style="cursor: pointer;">
+				</td>
+				<td align="right">
+					<input name="buttDoFilter" id="buttDoFilter" type="button"
+						class="button_sx" value="筛选数据" style="cursor: pointer;">
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<slrad>
+	<!-- proxool数据源配置 ,支持多个数据源 -->
+	<proxool>
+		<alias>dblc</alias>
+		<driver-url>jdbc:mysql://127.0.0.1:3306/db_lc</driver-url>
+		<driver-class>com.mysql.jdbc.Driver</driver-class>
+		<driver-properties>
+			<property name="useUnicode" value="true"/>
+			<property name="characterEncoding" value="UTF-8"/>
+			<property name="user" value="root" />
+			<property name="password" value="5bbe429c61" />
+		</driver-properties>
+		<maximum-connection-count>100</maximum-connection-count>
+		<minimum-connection-count>5</minimum-connection-count>
+		<house-keeping-test-sql>select 0</house-keeping-test-sql>
+			<trace>true</trace>
+		<maximum-active-time>1800000</maximum-active-time>
+	</proxool> 
+	<!-- <proxool>
+		<alias>dbHytt</alias>
+		<driver-url>jdbc:sqlserver://192.168.0.209:1433;databaseName=db_hytt</driver-url>
+		<driver-class>com.microsoft.sqlserver.jdbc.SQLServerDriver</driver-class>
+		<driver-properties>
+			<property name="useUnicode" value="true"/>
+			<property name="characterEncoding" value="UTF-8"/>
+			<property name="user" value="sa" />
+			<property name="password" value="39192777db63f6" />
+		</driver-properties>
+		<maximum-connection-count>100</maximum-connection-count>
+		<minimum-connection-count>5</minimum-connection-count>
+		<trace>true</trace>
+		<maximum-active-time>1800000</maximum-active-time>
+	</proxool>	-->
+</slrad>

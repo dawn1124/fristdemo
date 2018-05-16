@@ -1,0 +1,235 @@
+ody {
+	font-family: Arial, Helvetica, sans-serif;
+	margin: 0 auto;
+	font-size: 12px;
+	background-color:#EBF2FC;
+}
+
+td {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+th {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+a:link {
+	text-decoration: none;
+}
+
+a:visited {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: none;
+}
+
+a:active {
+	text-decoration: none;
+}
+
+div,form,table,tr,td,h1,h2,h3,h4,h5,h6{ padding:0; margin:0;}
+
+/*鐧诲綍椤垫牱寮�*/
+.top{
+	background-color:#4173B0;
+	height:5px;
+	overflow:hidden;
+}
+
+.logo{
+	width:950px;
+	margin:auto;
+	height:85px;
+	background:url(../images/logo.jpg) no-repeat 10px 28px;
+	font-family:"榛戜綋";
+	text-align:left;
+}
+
+.logo h5{
+	color:#595959;
+	font-size:28px;
+	padding:34px 10px 0 60px;
+	font-weight:normal;
+	font-style:italic;
+	float:left;
+}
+
+.logo h6{
+	font-weight:normal;
+	color:#0F5A9F;
+	font-size:16px;
+	padding:40px 0 0 0;
+}
+
+.login{
+	width:950px;
+	height:400px;
+	margin:auto;
+	text-align:left;
+}
+.login_left{
+	float:left;
+	width:405px;
+	height:400px;
+}
+.login_left h1{
+	background:url(../images/login01.jpg) no-repeat left top;
+	height:80px;
+}
+.login_left h2{
+	background:url(../images/login02.jpg) no-repeat left top;
+	height:80px;
+}
+.login_left h3{
+	background:url(../images/login03.jpg) no-repeat left top;
+	height:80px;
+}
+.login_left h4{
+	background:url(../images/login04.jpg) no-repeat left top;
+	height:80px;
+}
+.login_left h5{
+	background:url(../images/login05.jpg) no-repeat left top;
+	height:80px;
+}
+
+.login_right{
+	float:right;
+	width:545px;
+	height:400px;
+}
+.login_right h1{
+	background:url(../images/login06.jpg) no-repeat left top;
+	height:80px;
+}
+.login_right h2{
+	background:url(../images/login07.jpg) no-repeat left top;
+	height:70px;
+}
+.login_user{
+	background:url(../images/login08.jpg) no-repeat left top;
+	height:171px;
+}
+.login_user form{
+	margin:0 0 0 25px;
+}
+.login_user table {
+	text-align: left;
+	font-size: 14px;
+	color: #333;
+}
+.login_user table h4 input{
+	border:0;
+	padding-left:5px;
+	width:175px;
+	height:20px;
+	font-size: 12px;
+	background:none;
+}
+.login_textbox{
+	width: 180px;
+	height: 22px;
+	border:1px solid #C5C5C5;
+	background-color:#FEFECB;
+	font-size: 12px;
+	line-height: 16px;
+	margin-top: 3px;
+	color:#184589;
+}
+.login_button {
+	background: url(../images/loginbutton.jpg) no-repeat;
+	width: 116px;
+	height: 30px;
+	border: 0;
+	margin:25px 0 0 80px;}
+.login_right h3{
+	background:url(../images/login09.jpg) no-repeat left top;
+	height:20px;
+	font-weight:normal;
+}
+.login_right h4{
+	background:url(../images/login10.jpg) no-repeat left top;
+	height:59px;
+}
+
+.foot{
+	text-align:center;
+	margin-top:60px;
+	color:#7D7D7D;
+	font-size:12px;
+}
+
+
+
+
+
+
+#login {
+	width: 900px;
+	height: 340px;
+}
+#login_left {
+	float: left;
+	background: url(../images/login_left.jpg) no-repeat;
+	width: 348px;
+	height: 340px;
+}
+
+#login_right {
+	float: right;
+}
+
+#login_right_t {
+	width: 552px;
+	height:120px;
+	background: url(../images/login_rightt.jpg) no-repeat;}
+
+#login_right_t h1{
+	float:left;
+	font-family:"瀹嬩綋";
+	color:#F3B041;
+	font-weight:bolder;
+	font-size:50px;
+	margin-top:60px;
+}
+
+#login_right_t h5{
+	float:left;
+	font-family:"Arial Black", Gadget, sans-serif;
+	color:#C7F7FA;
+	font-weight:normal;
+	font-size:12px;
+	margin-top:90px;
+	font-style:italic;
+}
+
+
+#login_right_c {
+	width: 552px;
+	height: 66px;
+	background: url(../images/login_rightc.jpg) no-repeat;
+}
+
+#login_right_con {
+	width: 552px;
+	height: 74px;
+	background: url(../images/login_rightcon.jpg) no-repeat;
+}
+
+
+
+#login_right_f {
+	width: 552px;
+	height: 80px;
+	background: url(../images/login_rightf.jpg) no-repeat;
+}
+
+
+
+#login_inv {
+	background: url(../images/login_inv.jpg) no-repeat;
+	width: 900px;
+	height: 139px;
+}
